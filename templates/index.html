@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Room</title>
+    <style>
+        #localVideo, video {
+            width: 200px;
+            height: 150px;
+            margin: 5px;
+            background: black;
+        }
+        #remoteVideos {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Room: {{ room }}</h2>
+    <video id="localVideo" autoplay muted playsinline></video>
+    <div id="remoteVideos"></div>
+
+    <div>
+        <button id="muteBtn">Mute/Unmute</button>
+        <button id="videoBtn">Video On/Off</button>
+        <button id="screenShareBtn">Screen Share</button>
+    </div>
+
+    <!-- Hidden inputs to pass data from Flask -->
+    <input type="hidden" id="username" value="{{ username }}">
+    <input type="hidden" id="room" value="{{ room }}">
+    <input type="hidden" id="password" value="{{ password }}">
+
+    <!-- Load socket.io client -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Load our client script -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
+
