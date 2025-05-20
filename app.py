@@ -4,7 +4,7 @@ from flask_session import Session
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '30200200336'
+app.config['SECRET_KEY'] = 'MY KEY'
 app.config['SESSION_TYPE'] = 'FILESYSTEM'
 Session(app)
 socketio = SocketIO(app, manage_session = False)
