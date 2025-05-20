@@ -9,7 +9,9 @@ app.config['SESSION_TYPE'] = 'FILESYSTEM'
 Session(app)
 socketio = SocketIO(app, manage_session = False)
 rooms = {}
+
 # room_name:{password, host_sid, users:{sid:usermane}, lobby:{sid:username}}
+
 sid_to_room = {}
 @app.route('/', methods = ['GET','POST'])
 def login():
@@ -48,7 +50,9 @@ def on_join(data):
    sid = request.sid
    sid_to_room[sid] = room
    if room not in rooms:
+
       #Create Room, First User is Host
+
       rooms[room] = {password : password,
                      'host_sid' : sid,
                      'user' : {sid : username},
@@ -57,10 +61,14 @@ def on_join(data):
       emit('host', {'is_host' : True})
       emit_user_list(room)
    else:
+
       #Existing rooms : check password
+
       if rooms[room] ['password'] != password : emit('join_error', {'error' : 'Incorrect Room Password.'})
       return
+   
    #Put user in lobby , wait approval from host
+
    rooms[room]['lobby']
    [sid] = username
    emit('lobby_wait', {'message' : 'Waiting for Host approval.'})
@@ -102,18 +110,24 @@ def reject_user(data):
         emit_user_list(room)
         leave_room(room)
         if sid == info['host_sid']:
+            
             #Assign new host if possible
+
             if info['users']:
                new_host_sid = next(iter(info['users'])) 
                info['host_sid'] = new_host_sid
                socketio.emit('host',
                              {'is_host' : True}, room = new_host_sid)
             else:
+
                # No users left, Remove room
+
                rooms.pop(room)
         elif sid in info['lobby']:
             info['lobby'].pop(sid)
+
          # WebRTC signaling
+
       @socketio.on('signal')
       def on_signal(data):
             to_sid = data['to']
