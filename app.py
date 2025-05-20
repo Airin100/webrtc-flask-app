@@ -14,6 +14,7 @@ rooms = {}
 
 sid_to_room = {}
 @app.route('/', methods = ['GET','POST'])
+
 def login():
     if request.method == 'POST':
         username =  request.form.get('username')
@@ -37,6 +38,7 @@ def room():
                 username = session['username'],
                 room = session['room'], 
                 password = session['password'])
+
 def emit_user_list(room):
     if room in rooms and 'users' in rooms[room]:
         user_list = list(rooms[room]['users'].values())
@@ -74,10 +76,12 @@ def on_join(data):
    emit('lobby_wait', {'message' : 'Waiting for Host approval.'})
    emit('lobby_request',
         {'sid' : sid, 'username' : username}, to = rooms[room] ['host_sid'])
+   
    def emit_userlist(room):
       user_list = list(rooms[room]['users'].values())
       socketio.emit('user_list',
                     {'users' : user_list}, room = room)
+      
       @socketio.on('approve_user')
       def approve_user(data):
          room = sid_to_room.get(request.sid)
@@ -99,6 +103,7 @@ def reject_user(data):
       socketio.emit('join_rejected',
                     {'message' : 'Host rejected your request.'},
                     room = sid)
+      
       socketio.on('disconnect')
       def on_disconnect():
        sid = request.sid
@@ -135,6 +140,7 @@ def reject_user(data):
             socketio.emit('signal',
                           {'from' : request.sid, 'signal':
                            signal_data}, room = to_sid)
+            
             @socketio.on('mute')
             def on_mute(data):
                room = sid_to_room.get(request.sid)
@@ -143,6 +149,7 @@ def reject_user(data):
                socketio.emit('mute',
                              {'sid' : sid, 'muted' : muted},
                              room = room)
+               
                @socketio.on('video_toggle')
                def on_video_toggle(data):
                   room = sid_to_room.get(request.sid)
@@ -151,6 +158,7 @@ def reject_user(data):
                   socketio.emit('video_toggle',
                                 {'sid' : sid, video_on : video_on},
                                 room = room)
+                  
                   @socketio.on('screen_share')
                   def on_screen_share(data):
                      room = sid_to_room.get(request.sid)
