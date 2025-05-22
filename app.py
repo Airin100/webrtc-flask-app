@@ -4,7 +4,7 @@ from flask_session import Session
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'my-secret-key'
+app.config['SECRET_KEY'] =  os.environ.get('SECRET_KEY', 'fallback-secret')
 app.config['SESSION_TYPE'] = 'FILESYSTEM'
 Session(app)
 socketio = SocketIO(app, manage_session = False)
