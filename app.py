@@ -4,8 +4,8 @@ from flask_session import Session
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] =  os.environ.get('SECRET_KEY', 'fallback-secret')
-app.config['SESSION_TYPE'] = 'FILESYSTEM'
+app.config['SECRET_KEY'] = 'amar-sonar-bangla'
+app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 socketio = SocketIO(app, manage_session = False)
 rooms = {}
