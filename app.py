@@ -20,6 +20,7 @@ sid_to_room = {}
 @app.route('/', methods = ['GET','POST'])
 
 def login():
+    print("Login route accessed")
     if request.method == 'POST':
         username =  request.form.get('username')
         room = request.form.get('room')
