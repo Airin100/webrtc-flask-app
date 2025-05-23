@@ -4,10 +4,14 @@ from flask_session import Session
 import os
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'amar-sonar-bangla'
+app.config['SECRET_KEY'] = 'amar-sonar-bangla-20@21'
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_COOKIE_NAME'] = 'webrtc_session'
+app.config['SECRET_COOKIE_SECURE'] = True
+app.config['SESSION_HTTPONLY'] = True
+app.config['SECRET_COOKIE_SAMESITE'] = 'Lax'
 Session(app)
-socketio = SocketIO(app, manage_session = False)
+socketio = SocketIO(app, manage_session = True)
 rooms = {}
 
 # room_name:{password, host_sid, users:{sid:usermane}, lobby:{sid:username}}
