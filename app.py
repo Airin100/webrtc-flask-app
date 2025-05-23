@@ -45,43 +45,47 @@ def room():
 
 def emit_user_list(room):
     if room in rooms and 'users' in rooms[room]:
-        user_list = list(rooms[room]['users'].values())
+        user_list = []
+        for sid, username in rooms[room]['users'].items():
+            is_host = (sid == rooms[room]['host_sid'])
+            user_list.append({'username': username, 'is_host': is_host})
         socketio.emit('user_list', {'users': user_list}, room=room)
 
 @socketio.on('join')
 def on_join(data):
-   room = data['room']
-   username = data['username']
-   password = data.get('password','')
-   sid = request.sid
-   sid_to_room[sid] = room
-   if room not in rooms:
+    room = data['room']
+    username = data['username']
+    password = data.get('password', '')
+    sid = request.sid
 
-      #Create Room, First User is Host
+    sid_to_room[sid] = room
 
-      rooms[room] = {
-         'password' : password,
-         'host_sid' : sid,
-         'users' : {sid : username},
-         'lobby' : {}}
-      join_room(room)
-      emit('host', {'is_host' : True})
-      emit_user_list(room)
-   else:
+    if room not in rooms:
+        # Create Room, First User is Host
+        rooms[room] = {
+            'password': password,
+            'host_sid': sid,
+            'users': {sid: username},
+            'lobby': {}
+        }
+        join_room(room)
+        emit('host', {'is_host': True}, room=sid)
+        emit('join_approved', room=sid)
+        emit_user_list(room)
+    else:
+        # Existing room: check password
+        if rooms[room]['password'] != password:
+            emit('join_error', {'error': 'Incorrect Room Password.'}, room=sid)
+            return
 
-      #Existing rooms : check password
-
-      if rooms[room] ['password'] != password : 
-         emit('join_error', {'error' : 'Incorrect Room Password.'})
-         return
+        # Put user in lobby, wait for approval from host
+        rooms[room]['lobby'][sid] = username
+        emit('lobby_wait', {'message': 'Waiting for host approval...'}, room=sid)
+        emit('lobby_request', {
+            'sid': sid,
+            'username': username
+        }, to=rooms[room]['host_sid'])
    
-   #Put user in lobby , wait approval from host
-
-   rooms[room]['lobby'][sid] = username
-   emit('lobby_wait', {'message' : 'Waiting for Host approval.'})
-   emit('lobby_request',
-         {'sid' : sid, 'username' : username}, to = rooms[room] ['host_sid'])
-      
 @socketio.on('approve_user')
 def approve_user(data):
     room = sid_to_room.get(request.sid)
