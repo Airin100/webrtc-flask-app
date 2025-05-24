@@ -26,7 +26,7 @@ def login():
         room = request.form.get('room')
         password = request.form.get('password','')
         if not username or not room: 
-         return render_template('login.html', error = "Username and Room required")
+           return render_template('login.html', error = "Username and Room required")
         session['username'] = username
         session['room'] = room
         session['password'] = password
@@ -39,16 +39,16 @@ def room():
    if 'username'not in session or 'room' not in session:
       return redirect(url_for('login'))
    return render_template('index.html',
-                username = session['username'],
-                room = session['room'], 
-                password = session['password'])
-
+                          username = session['username'],
+                          room = session['room'], 
+                          password = session['password'])
+   
 def emit_user_list(room):
-    if room in rooms and 'users' in rooms[room]:
-        user_list = []
-        for sid, username in rooms[room]['users'].items():
-            is_host = (sid == rooms[room]['host_sid'])
-            user_list.append({'username': username, 'is_host': is_host})
+   if room in rooms and 'users' in rooms[room]:
+    user_list = []
+    for sid, username in rooms[room]['users'].items():
+        is_host = (sid == rooms[room]['host_sid'])
+        user_list.append({'username': username, 'is_host': is_host})
         socketio.emit('user_list', {'users': user_list}, room=room)
 
 @socketio.on('join')
@@ -57,23 +57,20 @@ def on_join(data):
     username = data['username']
     password = data.get('password', '')
     sid = request.sid
-
     sid_to_room[sid] = room
-
+    
     if room not in rooms:
-        # Create Room, First User is Host
         rooms[room] = {
-            'password': password,
-            'host_sid': sid,
-            'users': {sid: username},
-            'lobby': {}
-        }
+           'password': password,
+           'host_sid': sid,
+           'users': {sid: username},
+           'lobby': {}
+           }
         join_room(room)
         emit('host', {'is_host': True}, room=sid)
         emit('join_approved', room=sid)
-        emit_user_list(room)
+        emit_user_list(room) 
     else:
-        # Existing room: check password
         if rooms[room]['password'] != password:
             emit('join_error', {'error': 'Incorrect Room Password.'}, room=sid)
             return
