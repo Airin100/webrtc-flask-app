@@ -40,6 +40,11 @@ socket.on('lobby_request', data => {
 
 socket.on('user_list', data => {
     console.log('Users:', data.users);
+    data.users.forEach(sid => {
+        if (sid !== socket.id && !peers[sid] && localStream) {
+            callUser(sid);
+        }
+    });
 });
 
 // WebRTC & Signaling
@@ -48,10 +53,8 @@ function startMedia() {
         localStream = stream;
         document.getElementById('localVideo').srcObject = stream;
 
-        // Inform others about our stream
-        for (let sid in peers) {
-            callUser(sid);
-        }
+        // Try to call others in user list if already received
+        socket.emit('get_users'); // Optional: can emit again if needed
     });
 }
 
@@ -66,7 +69,9 @@ function callUser(sid) {
 }
 
 function createPeerConnection(sid) {
-    const pc = new RTCPeerConnection();
+    const pc = new RTCPeerConnection({
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+    });
 
     pc.onicecandidate = e => {
         if (e.candidate) {
@@ -79,6 +84,7 @@ function createPeerConnection(sid) {
         video.srcObject = e.streams[0];
         video.autoplay = true;
         video.playsInline = true;
+        video.setAttribute("data-sid", sid);
         document.getElementById('remoteVideos').appendChild(video);
     };
 
@@ -108,6 +114,7 @@ socket.on('signal', async data => {
 
 // Mute / Unmute
 document.getElementById("muteBtn").onclick = () => {
+    if (!localStream) return;
     let audioTrack = localStream.getAudioTracks()[0];
     audioTrack.enabled = !audioTrack.enabled;
     socket.emit('mute', { muted: !audioTrack.enabled });
@@ -115,6 +122,7 @@ document.getElementById("muteBtn").onclick = () => {
 
 // Video toggle
 document.getElementById("videoBtn").onclick = () => {
+    if (!localStream) return;
     let videoTrack = localStream.getVideoTracks()[0];
     videoTrack.enabled = !videoTrack.enabled;
     socket.emit('video_toggle', { video_on: videoTrack.enabled });
@@ -124,7 +132,7 @@ document.getElementById("videoBtn").onclick = () => {
 document.getElementById("screenShareBtn").onclick = async () => {
     const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
     const screenTrack = screenStream.getVideoTracks()[0];
-    const sender = localStream.getVideoTracks()[0];
+    const originalTrack = localStream.getVideoTracks()[0];
 
     for (let sid in peers) {
         let senderTrack = peers[sid].getSenders().find(s => s.track.kind === 'video');
@@ -136,7 +144,7 @@ document.getElementById("screenShareBtn").onclick = async () => {
     screenTrack.onended = () => {
         for (let sid in peers) {
             let senderTrack = peers[sid].getSenders().find(s => s.track.kind === 'video');
-            if (senderTrack) senderTrack.replaceTrack(sender);
+            if (senderTrack) senderTrack.replaceTrack(originalTrack);
         }
         socket.emit('screen_share', { sharing: false });
     };
