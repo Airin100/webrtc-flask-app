@@ -1,5 +1,4 @@
-Flask
-Flask-SocketIO
-Flask-Session
-python-socketio
+flask
+flask-socketio
+flask-session
 eventlet
