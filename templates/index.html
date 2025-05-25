@@ -30,14 +30,11 @@
         <button id="screenShareBtn">Screen Share</button>
     </div>
 
-    <!-- Hidden inputs to pass data from Flask -->
     <input type="hidden" id="username" value="{{ username }}">
     <input type="hidden" id="room" value="{{ room }}">
     <input type="hidden" id="password" value="{{ password }}">
 
-    <!-- Load socket.io client -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <!-- Load our client script -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
