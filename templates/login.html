@@ -1,40 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Join Room</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            max-width: 500px;
-            margin: auto;
-            padding-top: 50px;
-        }
-        input, button {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-        }
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-    </style>
+    <title>Login</title>
 </head>
 <body>
-    <h2>Join a Room</h2>
-
+    <h2>Join a Video Room</h2>
     {% if error %}
-    <div class="error">{{ error }}</div>
+        <p style="color: red;">{{ error }}</p>
     {% endif %}
-
     <form method="POST">
-        <input type="text" name="username" placeholder="Your Name" required>
-        <input type="text" name="room" placeholder="Room Name" required>
-        <input type="password" name="password" placeholder="Room Password (Optional)">
+        <input type="text" name="username" placeholder="Username" required><br>
+        <input type="text" name="room" placeholder="Room Name" required><br>
+        <input type="password" name="password" placeholder="Room Password (optional)"><br>
         <button type="submit">Join</button>
     </form>
 </body>
 </html>
-
